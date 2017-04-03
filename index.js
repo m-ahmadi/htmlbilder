@@ -1,7 +1,11 @@
+#!/usr/bin/env node
+
 const DEFAULT = {
-	root:        "template/static",
-	outFile:     "shindex.html",
-	indentChar:  "\t"
+	root:         "template/static",
+	outFile:      "shindex.html",
+	tempFilename: "main.handlebars",
+	dataFilesExt:  ".htm",
+	indentChar:   "\t"
 };
 const log = console.log;
 const args = process.argv; 
