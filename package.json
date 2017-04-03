@@ -1,0 +1,23 @@
+{
+  "name": "htmlbuild",
+  "description": "A CLI tool for creating one HTML file out of multiple HTML files and Handlebars templates.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": "./index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mohammad Ahmadi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m-ahmadi/html-builder.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chokidar": "^1.6.1",
+    "colors": "^1.1.2",
+    "handlebars": "^4.0.6",
+    "indent.js": "^0.1.4",
+    "util-ma": "^1.0.8"
+  }
+}
