@@ -4,7 +4,7 @@ const DEFAULT = {
 	root:         "template/static",
 	outFile:      "shindex.html",
 	tempFilename: "main.handlebars",
-	dataFilesExt:  ".htm",
+	dataFileExt:  ".htm",
 	indentChar:   "\t"
 };
 const log = console.log;
@@ -14,6 +14,8 @@ const ROOT = set("--root");
 const OUTPUT_FILE = set("--outFile");
 const INDENT_CHAR = set("--indentChar");
 const DIR = ROOT;
+const TEMP_FILENAME = set("--tempFilename");
+const DATA_FILE_EXT = set("--dataFileExt");
 
 let Handlebars = require("handlebars");
 let chokidar = require("chokidar");
@@ -95,9 +97,6 @@ function set(arg) {
 function readFile(path) {
 	return fs.readFileSync(path, { encoding: 'utf-8', flag: 'r' });
 }
-function writeFile(txt) {
-	fs.writeFileSync("shindex.html", txt);
-}
 function getDirs(p) {
 	return fs.readdirSync(p).filter( f => fs.statSync(p+"/"+f).isDirectory() );
 }
@@ -174,9 +173,9 @@ function fudge(path, o, ns) {
 	if (files.length) {
 		files.forEach(i => {
 			let fullPath = root+i;
-			if ( i.endsWith("main.handlebars") ) {
+			if ( i.endsWith(TEMP_FILENAME) ) {
 				addTemplate(fullPath, o, ns);
-			} else if ( i.endsWith(".htm") ) {
+			} else if ( i.endsWith(DATA_FILE_EXT) ) {
 				let fileName = i.substr( 0, i.indexOf('.') );
 				addData(fullPath, fileName, o, ns);
 			}
@@ -188,7 +187,7 @@ function fudge(path, o, ns) {
 			let fullPath = root+i;
 			let files = getFiles(fullPath);
 			if (files.length) {
-				if (files.indexOf("main.handlebars") !== -1) { // folder contains main.handlebars
+				if (files.indexOf(TEMP_FILENAME) !== -1) { // folder contains main.handlebars
 					fudge(fullPath, ns ? o.data[ns] : o, i);
 				} else { // folder doesn't contain .handlebars
 					dirHandler(fullPath, o.data[ns] || o, i);
@@ -204,7 +203,7 @@ function dirHandler(p, root, ns) {
 	
 	if (files.length) {
 		files.forEach(i => {
-			if ( i.endsWith(".htm") ) {
+			if ( i.endsWith(DATA_FILE_EXT) ) {
 				addData(path+i, i.substr( 0, i.indexOf('.') ), root, ns, true);
 			}
 		});
