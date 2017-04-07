@@ -1,87 +1,100 @@
 #!/usr/bin/env node
 
-const DEFAULT = {
-	root:         "template/static",
-	outFile:      "shindex.html",
+let defaults = {
+	root:         "./template/static",
+	outFile:      "./shindex.html",
 	tempFilename: "main.handlebars",
 	dataFileExt:  ".htm",
 	indentChar:   "\t"
 };
-const log = console.log;
-const args = process.argv; 
-const once = args.indexOf("--once") !== -1;
-const ROOT = set("--root"); 
-const OUTPUT_FILE = set("--outFile");
-const INDENT_CHAR = set("--indentChar");
-const DIR = ROOT;
-const TEMP_FILENAME = set("--tempFilename");
-const DATA_FILE_EXT = set("--dataFileExt");
+const Handlebars = require("handlebars");
+const indent = require("indent.js");
+const fs = require("fs");
+const u = require("util-ma");
+const path = require("path");
+const DS = path.sep;
 
-let Handlebars = require("handlebars");
-let chokidar = require("chokidar");
-let watcher = chokidar.watch(`${DIR}/**/*`, {ignored: /[\/\\]\./, persistent: true});
-let indent = require("indent.js");
-let colors = require("colors/safe");
-let fs = require("fs");
-let u = require("util-ma");
-
-let first = false;
-let fileOpt = {encoding: "utf-8", flag: "r"};
+const fileOpt = {encoding: "utf-8", flag: "r"};
 const isObj = u.isObj;
 const isStr = u.isStr;
 const isUndef = u.isUndef;
 
-let src = newEmpty();
-let html = "";
+let root, dir, outFile, indentChar, tempFilename, dataFileExt,
+	log, args, once,
+	chokidar, watcher, colors,
+	first;
 
-function newEmpty() {
-	return {
-		template: undefined,
-		data: {}
+if (require.main === module) { // called from command line
+	log = console.log;
+	args = process.argv; 
+	once = args.indexOf("--once") !== -1;
+
+	root = set("--root"); 
+	dir = root;
+	outFile = set("--outFile");
+	indentChar = set("--indentChar");
+	tempFilename = set("--tempFilename");
+	dataFileExt = set("--dataFileExt");
+	
+	colors = require("colors/safe");
+	if ( exists(dir) ) {
+		chokidar = require("chokidar");
+		watcher = chokidar.watch(`${dir}/**/*`, {ignored: /[\/\\]\./, persistent: true});
+	} else {
+		return;
+	}
+	
+	first = false;
+	addWatch();
+} else { // required as a module
+	module.exports = {
+		setConfig: setConfig,
+		buildHtml: buildHtml
 	};
 }
 
-if (once) {
-	buildHtml();
-	log( colors.blue.bold("The file ", colors.yellow(OUTPUT_FILE), "is created.") );
-} else {
-	watcher
-		.on("ready", function () {
-			first = true;
-			buildHtml();
-			log( colors.blue.bold("Initial", colors.yellow(OUTPUT_FILE), "is created.") );
-			log( colors.blue.bold("Watching", colors.yellow(DIR), "for changes...") );
-		})
-		.on("add", path => {
-			log( colors.green.bold("File added:"), path );
-			buildHtml();
-			msg();
-		})
-		.on("addDir", path => {
-			log( colors.black.bgGreen("Folder added: "), path );
-			buildHtml();
-			msg();
-		})
-		.on("unlink", path => {
-			log( colors.red.bold("File removed: "), path );
-			buildHtml();
-			msg();
-		})
-		.on("unlinkDir", path => {
-			log( colors.white.bgRed("Folder removed:"), path );
-			buildHtml();
-			msg();
-		})
-		.on("change", path => {
-			log( colors.cyan.bold("File changed: "), path );
-			buildHtml();
-			msg();
-		});
+function addWatch() {
+	if (once) {
+		buildHtml();
+		log( colors.blue.bold("The file ", colors.yellow(outFile), "is created.") );
+	} else {
+		watcher
+			.on("ready", function () {
+				first = true;
+				buildHtml();
+				log( colors.blue.bold("Initial", colors.yellow(outFile), "is created.") );
+				log( colors.blue.bold("Watching", colors.yellow(dir), "for changes...") );
+			})
+			.on("add", path => {
+				log( colors.green.bold("File added:"), path );
+				buildHtml();
+				msg();
+			})
+			.on("addDir", path => {
+				log( colors.black.bgGreen("Folder added: "), path );
+				buildHtml();
+				msg();
+			})
+			.on("unlink", path => {
+				log( colors.red.bold("File removed: "), path );
+				buildHtml();
+				msg();
+			})
+			.on("unlinkDir", path => {
+				log( colors.white.bgRed("Folder removed:"), path );
+				buildHtml();
+				msg();
+			})
+			.on("change", path => {
+				log( colors.cyan.bold("File changed: "), path );
+				buildHtml();
+				msg();
+			});
+	}
 }
-
 function msg() {
 	if (first) {
-		log( colors.blue.bold(colors.yellow(OUTPUT_FILE), "was recreated.") );
+		log( colors.blue.bold(colors.yellow(outFile), "was recreated.") );
 	}
 }
 function set(arg) {
@@ -91,8 +104,54 @@ function set(arg) {
 	} else {
 		// let k = arg.slice(2).replace(/([A-Z])/g, '_$1').toUpperCase(); // --outDir  to  OUT_DIR
 		let k = arg.slice(2); // --outDir  to  outDir
-		return DEFAULT[k];
+		return defaults[k];
 	}
+}
+function setConfig(o) {
+	if ( !isObj(o) ) { return false; }
+	
+	root         = o.root         || defaults.root;
+	dir          = root;
+	outFile      = o.outFile      || defaults.outFile;
+	indentChar   = o.indentChar   || defaults.indentChar;
+	tempFilename = o.tempFilename || defaults.tempFilename;
+	dataFileExt  = o.dataFileExt  || defaults.dataFileExt;
+	
+	return true;
+}
+function exists(dir) {
+	let existsSync = fs.existsSync;
+	if ( !existsSync(dir) ) {
+		log(
+			colors.red.bold("Root template directory:",
+			colors.white.bold.bgRed(" "+ dir +" "),
+			"does not exist!")
+		);
+		return false;
+	} else {
+		let tempFile = dir.endsWith(DS) ? dir + tempFilename : `${dir}${DS}${tempFilename}`;
+		if ( existsSync(tempFile) ) {
+			return true;
+		} else {
+			log(
+				colors.red.bold("Root template directory:"),
+				colors.white.bold.bgRed(" "+ dir +" "),
+				colors.red.bold("must contain a:"),
+				colors.white.bold.bgRed(" "+ tempFilename +" "),
+				colors.red.bold("file.")
+			);
+		}
+	}
+}
+
+let src = newEmpty();
+let html = "";
+
+function newEmpty() {
+	return {
+		template: undefined,
+		data: {}
+	};
 }
 function readFile(path) {
 	return fs.readFileSync(path, { encoding: 'utf-8', flag: 'r' });
@@ -167,15 +226,15 @@ function addData(filePath, fileName, root, namespace, noTemp) {
 	}
 }
 function fudge(path, o, ns) {
-	let root = path.endsWith("/") ? path: path+"/";
+	let root = path.endsWith(DS) ? path: path+DS;
 	
 	let files = getFiles(path);
 	if (files.length) {
 		files.forEach(i => {
 			let fullPath = root+i;
-			if ( i.endsWith(TEMP_FILENAME) ) {
+			if ( i.endsWith(tempFilename) ) {
 				addTemplate(fullPath, o, ns);
-			} else if ( i.endsWith(DATA_FILE_EXT) ) {
+			} else if ( i.endsWith(dataFileExt) ) {
 				let fileName = i.substr( 0, i.indexOf('.') );
 				addData(fullPath, fileName, o, ns);
 			}
@@ -187,7 +246,7 @@ function fudge(path, o, ns) {
 			let fullPath = root+i;
 			let files = getFiles(fullPath);
 			if (files.length) {
-				if (files.indexOf(TEMP_FILENAME) !== -1) { // folder contains main.handlebars
+				if (files.indexOf(tempFilename) !== -1) { // folder contains main.handlebars
 					fudge(fullPath, ns ? o.data[ns] : o, i);
 				} else { // folder doesn't contain .handlebars
 					dirHandler(fullPath, o.data[ns] || o, i);
@@ -197,13 +256,13 @@ function fudge(path, o, ns) {
 	}
 }
 function dirHandler(p, root, ns) {
-	let path = p.endsWith("/") ? p : p+"/";
+	let path = p.endsWith(DS) ? p : p+DS;
 	let files = getFiles(path);
 	let dirs = getDirs(path);
 	
 	if (files.length) {
 		files.forEach(i => {
-			if ( i.endsWith(DATA_FILE_EXT) ) {
+			if ( i.endsWith(dataFileExt) ) {
 				addData(path+i, i.substr( 0, i.indexOf('.') ), root, ns, true);
 			}
 		});
@@ -216,7 +275,7 @@ function dirHandler(p, root, ns) {
 }
 
 function buildSrc() {
-	fudge(DIR, src);
+	fudge(dir, src);
 	// console.log(src);
 }
 function compile(o, parent, key) {
@@ -236,6 +295,6 @@ function compile(o, parent, key) {
 function buildHtml() {
 	buildSrc();
 	html = compile(src);
-	html = indent.indentHTML(html, "\t");
-	fs.writeFileSync(OUTPUT_FILE, html);
+	html = indent.indentHTML(html, indentChar);
+	fs.writeFileSync(outFile, html);
 }
