@@ -1,0 +1,12 @@
+htmlbilder
+===================
+
+`htmlbilder` is a tool for creating one and only one HTML file, out of many Handelbars templates.
+
+It mainly requires one thing, and that is a directory with a `main.handlebars` file in it.  
+It then renders that template and will put the output in a HTML file.  
+As you probably already know, in order to render a Handlebars (or Mustache) template, we need to pass a context object (data object) to it.
+When `htmlbilder` is rendering the template: `main.handlebars` in let's say: `path/to/dir` folder,  
+it searches for all the `.htm` files in that folder, and if it finds any,
+it then passes the contents of each file as a property to the context-object.
+It uses the name of the `.htm` file as the key, and contents of the file as the value of that property.
