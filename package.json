@@ -1,7 +1,7 @@
 {
-  "name": "htmlbilder",
-  "description": "A CLI tool for creating one HTML file out of multiple HTML files and Handlebars templates.",
-  "version": "1.0.0",
+  "name": "htmbilder",
+  "description": "A CLI tool for creating one HTML file out of many files and templates.",
+  "version": "0.0.1",
   "bin": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,6 +17,7 @@
     "colors": "^1.1.2",
     "handlebars": "^4.0.6",
     "indent.js": "^0.1.4",
-    "util-ma": "^1.0.8"
+    "util-ma": "^1.0.8",
+    "yargs": "^7.0.2"
   }
 }
