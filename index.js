@@ -15,6 +15,7 @@ const indent = require("indent.js");
 const fs = require("fs");
 const u = require("util-ma");
 const path = require("path");
+const SEP = path.sep;
 const DS = "/";
 
 const fileOpt = {encoding: "utf-8", flag: "r"};
@@ -60,6 +61,7 @@ if (require.main === module) { // called from command line
 	setConfig(args);
 	let dirExists = exists(dir);
 	if (!dirExists) { return; }
+	if ( !isOutFileValid(outFile) ) { return; }
 	
 	if (args.w) {
 		first = false;
@@ -189,6 +191,17 @@ function exists(dir) {
 		return false
 		// /^.+.*[.]{1}[^.]*$/
 	}
+}
+function isOutFileValid(path) {
+	if ( path.endsWith(DS) || path.endsWith(SEP) ) {
+		log(
+			colors.red.bold("outFile:"),
+			colors.white.bold.bgRed(" "+ path +" "),
+			colors.red.bold("must be path of a file, and not a directory!")
+		);
+		return false;
+	}
+	return true;
 }
 function isDir(p) {
 	return fs.lstatSync(p).isDirectory();
