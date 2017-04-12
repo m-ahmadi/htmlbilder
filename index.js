@@ -278,8 +278,10 @@ function addData(filePath, fileName, root, namespace, noTemp) {
 		o.data[fileName] = readFile(filePath);
 	} else {
 		if (namespace) {
+			o[namespace] += "\n";
 			o[namespace] += readFile(filePath) ;
 		} else {
+			o += "\n";
 			o += readFile(filePath) ;
 		}
 		
