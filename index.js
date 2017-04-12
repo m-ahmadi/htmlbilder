@@ -18,7 +18,7 @@ const path = require("path");
 const SEP = path.sep;
 const DS = "/";
 
-const fileOpt = {encoding: "utf-8", flag: "r"};
+const fileOpt = {encoding: "utf8", flag: "r"};
 const isObj = u.isObj;
 const isStr = u.isStr;
 const isUndef = u.isUndef;
@@ -28,7 +28,7 @@ let dir, outFile, tempFiles, dataFilesExt, indentChar,
 	chokidar, watcher, colors,
 	first;
 
-let src = newEmpty();
+let src;
 let html = "";
 
 if (require.main === module) { // called from command line
@@ -214,7 +214,7 @@ function newEmpty() {
 	};
 }
 function readFile(path) {
-	return fs.readFileSync(path, { encoding: "utf-8", flag: "r" });
+	return fs.readFileSync(path, { encoding: "utf8", flag: "r" });
 }
 function getDirs(p) {
 	return fs.readdirSync(p).filter( f => fs.statSync(p+"/"+f).isDirectory() );
@@ -355,8 +355,9 @@ function compile(o, parent, key) {
 	}
 }
 function buildHtml() {
+	src = newEmpty();
 	buildSrc();
 	html = compile(src);
 	html = indent.indentHTML(html, indentChar);
-	fs.writeFileSync(outFile, html);
+	fs.writeFileSync(outFile, html, "utf8");
 }
