@@ -39,6 +39,7 @@ if (require.main === module) { // called from command line
 	
 	const y = require("yargs");
 	y.usage("Usage: \n $0 templates/ -o index.html [-t main.hbs -e .html -w]");
+	y.version();
 	y.options( require("./yOpts") );
 	y.help('h').alias('h', 'help')
 	let args = y.argv;
@@ -51,10 +52,6 @@ if (require.main === module) { // called from command line
 			colors.yellow.bold("No argument was specified,"),
 			colors.yellow.bold("switching to default values...\n")
 		);
-	}
-	if (args.v) {
-		console.log( JSON.parse(fs.readFileSync("./package.json")).version );
-		return;
 	}
 	
 	if (args._.length) {
