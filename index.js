@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
 let defaults = {
-	rootDir:      "./template",
-	outFilePath:  "./",
-	outFileName:  "index-built",
-	outFileExt:   ".html",
+	rootDir:       "./template",
+	outFilePath:   "./",
+	outFileName:   "index-built",
+	outFileExt:    ".html",
 	tempFilesName: "main",
 	tempFilesExt:  ".handlebars",
 	dataFilesExt:  ".htm",
-	indentChar:   "\t"
+	indentChar:    "\t",
+	indentCount:   1
 };
 const Handlebars = require("handlebars");
 const indent = require("indent.js");
@@ -36,17 +37,17 @@ if (require.main === module) { // called from command line
 	colors = require("colors/safe");
 	
 	const y = require("yargs");
-	y.usage("Usage: \n htmbilder templates/ -o index.html [-t main.hbs -e .html -w]");
+	y.usage("Usage: \n $0 templates/ -o index.html [-t main.hbs -e .html -w]");
 	y.options( require("./yOpts") );
 	y.help('h').alias('h', 'help')
 	let args = y.argv;
 	
-	if (!process.argv.slice(2).length ||
-		(!args.r && !args.o && !args.t && !args.e && !args.i && !args.w && !args.v &&
-		!args.P && !args.N && !args.X && !args.T && !args.E)
+	if ( !process.argv.slice(2).length && !args._.length &&
+		!args.r && !args.o && !args.t && !args.e && !args.i && !args.c && !args.w && !args.v &&
+		!args.P && !args.N && !args.X && !args.T && !args.E
 	) {
 		log(
-			colors.yellow.bold("No arguments was specified,"),
+			colors.yellow.bold("No argument was specified,"),
 			colors.yellow.bold("switching to default values...\n")
 		);
 	}
@@ -70,7 +71,7 @@ if (require.main === module) { // called from command line
 		addWatch();
 	} else {
 		buildHtml();
-		log( colors.blue.bold("The file", colors.yellow(outFile), "is created.") );
+		log( colors.blue.bold("File:", colors.yellow(outFile), "is created.") );
 	}
 	
 } else { // required as a module
@@ -150,7 +151,14 @@ function setConfig(a) {
 		tempFiles += a.tempFilesName || defaults.tempFilesName;
 		tempFiles += ext.startsWith(".") ? ext : "."+ ext;
 	}
-	indentChar    = a.indentChar   || defaults.indentChar;
+	let i = a.indentChar;
+	i = i === "tab"    ? i = "\t"   :
+		i === "space4" ? i = "    " :
+		i === "space2" ? i = "  "   :
+		i === "space"  ? i = " "    : defaults.indentChar;
+	let c = a.indentCount;
+	c = u.isNum(c) ? c > 10 ? 10 : c : defaults.indentCount;
+	indentChar    = i.repeat(c);
 	dataFilesExt  = a.dataFilesExt || defaults.dataFilesExt;
 	dataFilesExt  = dataFilesExt.startsWith(".") ? dataFilesExt : "."+ dataFilesExt;
 	

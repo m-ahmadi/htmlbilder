@@ -28,10 +28,19 @@ const opts = {
 		"alias": "dataFilesExt"
 	},
 	"i": {
-		"describe": "Indent character for indenting the output HTML file. \n default: \\t",
-		"type": "boolean",
+		"describe": "Indent character for indenting the output HTML file. \n [tab|space4|space2|space|char] default: tab",
+		"type": "string",
+		"nargs": 1,
 //		"default": "\t",
 		"alias": "indentChar"
+	},
+	"c": {
+		"describe": "How many indentChar. default: 1 (maximum value: 10)",
+		
+		"number": true,
+		"nargs": 1,
+//		"default": "\t",
+		"alias": "indentCount"
 	},
 	"w": {
 		"describe": "Watch for changes and recreate the output file on changes.",
