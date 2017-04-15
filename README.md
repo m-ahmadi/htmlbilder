@@ -78,7 +78,7 @@ our *`index.html`* would look like this:
 ## CLI:
 ```
 Usage:
- index templates/ -o index.html [-t main.hbs -e .html -w]
+ htmlbilder templates/ -o index.html [-t main.hbs -e .html -w]
 
 Options:
   -r, --rootDir        Templates directory path. Ignored if hyphenless arg is provided. default: ./template  [string]
