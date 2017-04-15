@@ -1,6 +1,6 @@
 {
   "name": "htmlbilder",
-  "description": "A CLI (and node module) tool for creating one HTML file out of many Handlebars templates.",
+  "description": "A tool (CLI and Node) for creating one HTML file out of many Handlebars templates/layouts.",
   "version": "0.0.1",
   "bin": "index.js",
   "scripts": {

@@ -23,6 +23,7 @@ const fileOpt = {encoding: "utf8", flag: "r"};
 const isObj = u.isObj;
 const isStr = u.isStr;
 const isUndef = u.isUndef;
+const isNum = u.isNum;
 
 let dir, outFile, tempFiles, dataFilesExt, indentChar,
 	log, args, once,
@@ -157,7 +158,7 @@ function setConfig(a) {
 		i === "space2" ? i = "  "   :
 		i === "space"  ? i = " "    : defaults.indentChar;
 	let c = a.indentCount;
-	c = u.isNum(c) ? c > 10 ? 10 : c : defaults.indentCount;
+	c = isNum(c) ? c > 10 ? 10 : c : defaults.indentCount;
 	indentChar    = i.repeat(c);
 	dataFilesExt  = a.dataFilesExt || defaults.dataFilesExt;
 	dataFilesExt  = dataFilesExt.startsWith(".") ? dataFilesExt : "."+ dataFilesExt;
