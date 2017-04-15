@@ -13,7 +13,7 @@ It looks in the folders in the directory that the template was found in too:
 If folder does not contain a *`main.handlebars`* file, then it looks for any *`.htm`* files, and if it finds any, it concatenates them and passes them to the template as data, using the name of the folder as key and the concatenated result as value.  
 But if folder does contain a *`main.handlebars`* then it tries to render that template according to the same rules, and when it is done rendering it, it passes the output to the first template, using name of the folder as key and the render output as value.
 
-You can configure it to use different file name or extension for files.  
+You can configure it to use different name patterns or extension for files.  
 Let's see some examples:
 
 ## Usage example:
