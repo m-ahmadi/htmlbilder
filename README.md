@@ -164,7 +164,6 @@ option              | description
 ```
 *`templates/sidebar.htm`:*
 ```html
-<!DOCTYPE html>
 <div id="sidebar"></div>
 ```
 *`templates/header/main.handlebars`:*
@@ -180,7 +179,7 @@ option              | description
 ```
 *`templates/header/nav.htm`:*
 ```html
-<nav id="navbar"></nav>
+<nav id="navigation"></nav>
 ```
 
 *`index.html`* after running `htmlbilder templates/ -o index.html`:
@@ -192,7 +191,7 @@ option              | description
   </head>
   <body>
     <header>
-      <nav id="navbar"></nav>
+      <nav id="navigation"></nav>
       <div id="user-info"></div>
     </header>
     
