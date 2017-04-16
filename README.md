@@ -18,13 +18,11 @@ Let's see some examples:
 
 ## Usage example:
 If we have the following directory:
-```javascript
-/*
-  templates/
-  ----main.handlebars
-  ----header.htm
-  ----footer.htm
-*/
+```
+templates/
+├─ main.handlebars
+├─ header.htm
+└─ footer.htm
 ```
 and our *`main.handlebars`* contained:
 ```html
@@ -137,16 +135,14 @@ option              | description
 
 ## More examples:
 ### A directory (containing a template) as data:
-```javascript
-/*
-  templates/
-  ----main.handlebars
-  ----sidebar.htm
-  ----header/
-  --------main.handlebars
-  --------user.htm
-  --------nav.htm
-*/
+```
+templates/
+├─ main.handlebars
+├─ sidebar.htm
+└─ header/
+   ├─ main.handlebars
+   ├─ user.htm
+   └─ nav.htm
 ```
 *`templates/main.handlebars`:*
 ```html
@@ -201,18 +197,16 @@ option              | description
 ```
 ### A directory (not containing a template) as data:
 When a directory does not contain a template, all the data files inside it (if there's any) or inside any subsequent folders will be concatenated.
-```javascript
-/*
-  templates/
-  ----main.handlebars
-  ----sidebar.htm
-  ----modals/
-  --------confirm.htm
-  --------alert.htm
-  --------prompts/
-  ------------age.htm
-  ------------job.htm
-*/
+```
+templates/
+├─ main.handlebars
+├─ sidebar.htm
+└─ modals/
+   ├─ confirm.htm
+   ├─ alert.htm
+   └─ prompts/
+      ├─ age.htm
+      └─ job.htm
 ```
 *`templates/main.handlebars`:*
 ```html
