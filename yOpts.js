@@ -28,7 +28,7 @@ const opts = {
 		"alias": "dataFilesExt"
 	},
 	"i": {
-		"describe": "Indent character for indenting the output HTML file. \n [tab|space4|space2|space|char] default: tab",
+		"describe": "Indent character for indenting the output HTML file. \n [tab|space4|space2|space] default: tab",
 		"type": "string",
 		"nargs": 1,
 //		"default": "\t",

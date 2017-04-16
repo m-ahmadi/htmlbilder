@@ -86,7 +86,7 @@ Options:
   -t, --tempFiles      Template files.  default: main.handlebars                                             [string]
   -e, --dataFilesExt   Extention of data files. default: .htm                                                [string]
   -i, --indentChar     Indent character for indenting the output HTML file.
-                       [tab|space4|space2|space|char] default: tab                                           [string]
+                       [tab|space4|space2|space] default: tab                                                [string]
   -c, --indentCount    How many indentChar. default: 1 (maximum value: 10)                                   [number]
   -w, --watch          Watch for changes and recreate the output file on changes.                            [boolean]
   -P, --outFilePath    Path of the output HTML file, Ignored if --outFile is provided. default: ./           [string]
