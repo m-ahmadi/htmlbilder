@@ -14,14 +14,14 @@ const opts = {
 		"alias": "outFile"
 	},
 	"t": {
-		"describe": "Template files. \n default: main.handlebars",
+		"describe": "Filename pattern for the template files. \n default: main.handlebars",
 		"type": "string",
 		"nargs": 1,
 //		"default": "main.handlebars",
 		"alias": "tempFiles"
 	},
 	"e": {
-		"describe": "Extention of data files. \n default: .htm",
+		"describe": "Extension of data files. It can start with or without a dot. (.htm or htm) \n default: .htm",
 		"type": "string",
 		"nargs": 1,
 //		"default": ".htm",
@@ -35,7 +35,7 @@ const opts = {
 		"alias": "indentChar"
 	},
 	"c": {
-		"describe": "How many indentChar. default: 1 (maximum value: 10)",
+		"describe": "How many indentChar? default: 1 (maximum value: 10)",
 		
 		"number": true,
 		"nargs": 1,
@@ -63,7 +63,7 @@ const opts = {
 		"alias": "outFileName"
 	},
 	"X": {
-		"describe": "Extention of the output HTML file, Ignored if --outFile is provided. \n default: .html",
+		"describe": "Extension of the output HTML file, Ignored if --outFile is provided. \n default: .html",
 		"type": "string",
 		"nargs": 1,
 //		"default": ".html"
@@ -77,7 +77,7 @@ const opts = {
 		"alias": "tempFilesName"
 	},
 	"E": {
-		"describe": "Extention of template files. Ignored if --tempFiles is provided. \n default: .handlebars",
+		"describe": "Extension of template files. Ignored if --tempFiles is provided. \n default: .handlebars",
 		"type": "string",
 		"nargs": 1,
 //		"default": ".handlebars"
