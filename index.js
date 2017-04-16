@@ -41,7 +41,8 @@ if (require.main === module) { // called from command line
 	y.usage("Usage: \n $0 templates/ -o index.html [-t main.hbs -e .html -w]");
 	y.version();
 	y.options( require("./yOpts") );
-	y.help('h').alias('h', 'help')
+	y.alias("h", "help");
+	y.help("h");
 	let args = y.argv;
 	
 	if ( !process.argv.slice(2).length && !args._.length &&
