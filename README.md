@@ -130,7 +130,7 @@ option              | description
 *__outFile__*       | Where to write the output HTML file.
 *__tempFiles__*     | What filename pattern should be considered as a template. default: *`main.handlebars`*
 *__dataFilesExt__*  | What file extension should be considered as a data file. It can start with or without a dot. (`.htm` or `htm`). default: *`.htm`*
-*__indentChar__*    | What Character to use for indenting the output HTML file. [tab, space4, space2, space] default: tab"
+*__indentChar__*    | What Character to use for indenting the output HTML file. [tab, space4, space2, space] default: tab
 
 
 ## More examples:
