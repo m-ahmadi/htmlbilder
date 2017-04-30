@@ -36,7 +36,7 @@ let html = "";
 if (require.main === module) { // called from command line
 	log = console.log;
 	colors = require("colors/safe");
-	
+
 	const y = require("yargs");
 	y.usage("Usage: \n $0 templates/ -o index.html [-t main.hbs -e .html -w]");
 	y.version();
@@ -44,7 +44,7 @@ if (require.main === module) { // called from command line
 	y.alias("h", "help");
 	y.help("h");
 	let args = y.argv;
-	
+
 	if ( !process.argv.slice(2).length && !args._.length &&
 		!args.r && !args.o && !args.t && !args.e && !args.i && !args.c && !args.w && !args.v &&
 		!args.P && !args.N && !args.X && !args.T && !args.E
@@ -54,7 +54,7 @@ if (require.main === module) { // called from command line
 			colors.yellow.bold("switching to default values...\n")
 		);
 	}
-	
+
 	if (args._.length) {
 		args.hyphenless = args._[0];
 	}
@@ -62,7 +62,7 @@ if (require.main === module) { // called from command line
 	let dirExists = exists(dir);
 	if (!dirExists) { return; }
 	if ( !isOutFileValid(outFile) ) { return; }
-	
+
 	if (args.w) {
 		first = false;
 		chokidar = require("chokidar");
@@ -72,7 +72,7 @@ if (require.main === module) { // called from command line
 		buildHtml();
 		log( colors.blue.bold("File:", colors.yellow(outFile), "is created.") );
 	}
-	
+
 } else { // required as a module
 	module.exports = {
 		setConfig: setConfig,
@@ -132,7 +132,7 @@ function set(arg) {
 }
 function setConfig(a) {
 	if ( !isObj(a) ) { return false; }
-	
+
 	dir = a.hyphenless ? a.hyphenless : a.rootDir || defaults.rootDir;
 	if (a.outFile) {
 		outFile = a.outFile;
@@ -160,7 +160,7 @@ function setConfig(a) {
 	indentChar    = i.repeat(c);
 	dataFilesExt  = a.dataFilesExt || defaults.dataFilesExt;
 	dataFilesExt  = dataFilesExt.startsWith(".") ? dataFilesExt : "."+ dataFilesExt;
-	
+
 	return true;
 }
 function exists(dir) {
@@ -271,7 +271,7 @@ function getTarget(root, namespace, noTemp) {
 	} else {
 		o = src;
 	}
-	
+
 	return o;
 }
 function addTemplate(path, root, namespace) {
@@ -280,7 +280,7 @@ function addTemplate(path, root, namespace) {
 }
 function addData(filePath, fileName, root, namespace, noTemp) {
 	let o = getTarget(root, namespace, noTemp);
-	
+
 	if (!noTemp) {
 		o.data[fileName] = readFile(filePath);
 	} else {
@@ -291,12 +291,12 @@ function addData(filePath, fileName, root, namespace, noTemp) {
 			o += "\n";
 			o += readFile(filePath) ;
 		}
-		
+
 	}
 }
 function fudge(path, o, ns) {
 	let root = path.endsWith(DS) ? path: path+DS;
-	
+
 	let files = getFiles(path);
 	if (files.length) {
 		files.forEach(i => {
@@ -328,7 +328,7 @@ function dirHandler(p, root, ns) {
 	let path = p.endsWith(DS) ? p : p+DS;
 	let files = getFiles(path);
 	let dirs = getDirs(path);
-	
+
 	if (files.length) {
 		files.forEach(i => {
 			if ( i.endsWith(dataFilesExt) ) {
