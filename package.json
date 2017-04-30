@@ -1,8 +1,10 @@
 {
   "name": "htmlbilder",
   "description": "A tool (CLI and Node) for creating one HTML file out of many Handlebars templates/layouts.",
-  "version": "0.1.1",
-  "bin": "index.js",
+  "version": "0.1.2",
+  "bin": {
+    "htmlbilder": "index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
