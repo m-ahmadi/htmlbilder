@@ -126,7 +126,7 @@ htmlbilder.buildHtml();
 ## Main options:
 option              | description
 --------------------|---------------
-*__rootDir__*       | A directory that *`htmlbilder`* starts it's work from there.
+*__rootDir__*       | A directory that *`htmlbilder`* starts its work from there.
 *__outFile__*       | Where to write the output HTML file.
 *__tempFiles__*     | What filename pattern should be considered as a template. default: *`main.handlebars`*
 *__dataFilesExt__*  | What file extension should be considered as a data file. It can start with or without a dot. (`.htm` or `htm`). default: *`.htm`*
