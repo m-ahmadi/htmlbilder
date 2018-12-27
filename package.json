@@ -1,7 +1,7 @@
 {
   "name": "htmlbilder",
   "description": "A tool (CLI and Node) for creating one HTML file out of many Handlebars templates/layouts.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "main": "index.js",
   "bin": "index.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "type": "git",
     "url": "https://github.com/m-ahmadi/htmlbilder.git"
   },
+  "keywords": ["html", "template", "layout", "concatenate", "handlebars"],
   "license": "MIT",
   "dependencies": {
     "chokidar": "^1.6.1",
