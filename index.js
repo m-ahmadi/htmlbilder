@@ -167,7 +167,6 @@ function exists(dir) {
   let existsSync = fs.existsSync;
   if ( existsSync(dir) ) {
     if ( isDir(dir) ) {
-      debugger
       let mainTemp = dir.endsWith(DS) ? dir + tempFiles : `${dir}${DS}${tempFiles}`;
       if ( existsSync(mainTemp) ) {
         return true;
@@ -365,6 +364,6 @@ function buildHtml() {
   src = newEmpty();
   buildSrc();
   html = compile(src);
-  html = indent.indentHTML(html, indentChar);
+  html = indent.html(html, {tabString: indentChar});
   fs.writeFileSync(outFile, html, "utf8");
 }
