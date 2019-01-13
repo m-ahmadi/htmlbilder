@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let defaults = {
+const defaults = {
   rootDir:       "./template",
   outFilePath:   "./",
   outFileName:   "index-built",
@@ -11,22 +11,21 @@ let defaults = {
   indentChar:    "\t",
   indentCount:   1
 };
+const path = require("path");
+const fs = require("fs");
 const Handlebars = require("handlebars");
 const indent = require("indent.js");
-const fs = require("fs");
 const u = require("util-ma");
-const path = require("path");
 const SEP = path.sep;
 const DS = "/";
 
-const fileOpt = {encoding: "utf8", flag: "r"};
 const isObj = u.isObj;
 const isStr = u.isStr;
 const isUndef = u.isUndef;
 const isNum = u.isNum;
 
 let dir, outFile, tempFiles, dataFilesExt, indentChar,
-  log, args, once,
+  log,
   chokidar, watcher, colors,
   first;
 
@@ -120,16 +119,6 @@ function msg() {
     log( colors.blue.bold(colors.yellow(outFile), "was recreated.") );
   }
 }
-function set(arg) {
-  let idx = args.indexOf(arg);
-  if (idx !== -1) {
-    return args[ idx + 1 ];
-  } else {
-    // let k = arg.slice(2).replace(/([A-Z])/g, "_$1").toUpperCase(); // --outDir  to  OUT_DIR
-    let k = arg.slice(2); // --outDir  to  outDir
-    return defaults[k];
-  }
-}
 function setConfig(a) {
   if ( !isObj(a) ) { return false; }
 
@@ -194,7 +183,7 @@ function exists(dir) {
       colors.white.bold.bgRed(" "+ dir +" "),
       "does not exist!")
     );
-    return false
+    return false;
     // /^.+.*[.]{1}[^.]*$/
   }
 }
