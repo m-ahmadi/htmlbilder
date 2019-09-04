@@ -140,10 +140,11 @@ function setConfig(a) {
     tempFiles += ext.startsWith(".") ? ext : "."+ ext;
   }
   let i = a.indentChar;
-  i = i === "tab"  ? i = "\t"   :
-    i === "space4" ? i = "    " :
-    i === "space2" ? i = "  "   :
-    i === "space"  ? i = " "    : defaults.indentChar;
+  i = i === "tab"    ? "\t"   :
+      i === "space4" ? "    " :
+      i === "space2" ? "  "   :
+      i === "space"  ? " "    :
+      defaults.indentChar;
   let c = a.indentCount;
   c = isNum(c) ? c > 10 ? 10 : c : defaults.indentCount;
   indentChar    = i.repeat(c);
