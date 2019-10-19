@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 
 const defaults = {
-  rootDir:       "./template",
-  outFilePath:   "./",
-  outFileName:   "index-built",
-  outFileExt:    ".html",
-  tempFilesName: "main",
-  tempFilesExt:  ".handlebars",
-  dataFilesExt:  ".htm",
-  indentChar:    "\t",
+  rootDir:       './template',
+  outFilePath:   './',
+  outFileName:   'index-built',
+  outFileExt:    '.html',
+  tempFilesName: 'main',
+  tempFilesExt:  '.handlebars',
+  dataFilesExt:  '.htm',
+  indentChar:    '\t',
   indentCount:   1
 };
-const path = require("path");
-const fs = require("fs");
-const Handlebars = require("handlebars");
-const indent = require("indent.js");
-const u = require("util-ma");
+const path = require('path');
+const fs = require('fs');
+const Handlebars = require('handlebars');
+const indent = require('indent.js');
+const u = require('util-ma');
 const SEP = path.sep;
-const DS = "/";
+const DS = '/';
 
 const isObj = u.isObj;
 const isStr = u.isStr;
@@ -30,18 +30,18 @@ let dir, outFile, tempFiles, dataFilesExt, indentChar,
   first;
 
 let src;
-let html = "";
+let html = '';
 
 if (require.main === module) { // called from command line
   log = console.log;
-  colors = require("colors/safe");
+  colors = require('colors/safe');
 
-  const y = require("yargs");
-  y.usage("Usage: \n $0 templates/ -o index.html [-t main.hbs -e .html -w]");
+  const y = require('yargs');
+  y.usage('Usage: \n $0 templates/ -o index.html [-t main.hbs -e .html -w]');
   y.version();
-  y.options( require("./yOpts") );
-  y.alias("h", "help");
-  y.help("h");
+  y.options( require('./yOpts') );
+  y.alias('h', 'help');
+  y.help('h');
   let args = y.argv;
 
   if ( !process.argv.slice(2).length && !args._.length &&
@@ -49,8 +49,8 @@ if (require.main === module) { // called from command line
     !args.P && !args.N && !args.X && !args.T && !args.E
   ) {
     log(
-      colors.yellow.bold("No argument was specified,"),
-      colors.yellow.bold("switching to default values...\n")
+      colors.yellow.bold('No argument was specified,'),
+      colors.yellow.bold('switching to default values...\n')
     );
   }
 
@@ -64,12 +64,12 @@ if (require.main === module) { // called from command line
 
   if (args.w) {
     first = false;
-    chokidar = require("chokidar");
+    chokidar = require('chokidar');
     watcher = chokidar.watch(`${dir}/**/*`, {ignored: /[\/\\]\./, persistent: true});
     addWatch();
   } else {
     buildHtml();
-    log( colors.blue.bold("File:", colors.yellow(outFile), "is created.") );
+    log( colors.blue.bold('File:', colors.yellow(outFile), 'is created.') );
   }
 
 } else { // required as a module
@@ -82,41 +82,41 @@ if (require.main === module) { // called from command line
 
 function addWatch() {
   watcher
-    .on("ready", function () {
+    .on('ready', function () {
       first = true;
       buildHtml();
-      log( colors.blue.bold("Initial", colors.yellow(outFile), "is created.") );
-      log( colors.blue.bold("Watching", colors.yellow(dir), "for changes...") );
+      log( colors.blue.bold('Initial', colors.yellow(outFile), 'is created.') );
+      log( colors.blue.bold('Watching', colors.yellow(dir), 'for changes...') );
     })
-    .on("add", path => {
-      log( colors.green.bold("File added:"), path );
+    .on('add', path => {
+      log( colors.green.bold('File added:'), path );
       buildHtml();
       msg();
     })
-    .on("addDir", path => {
-      log( colors.black.bgGreen("Folder added: "), path );
+    .on('addDir', path => {
+      log( colors.black.bgGreen('Folder added: '), path );
       buildHtml();
       msg();
     })
-    .on("unlink", path => {
-      log( colors.red.bold("File removed: "), path );
+    .on('unlink', path => {
+      log( colors.red.bold('File removed: '), path );
       buildHtml();
       msg();
     })
-    .on("unlinkDir", path => {
-      log( colors.white.bgRed("Folder removed:"), path );
+    .on('unlinkDir', path => {
+      log( colors.white.bgRed('Folder removed:'), path );
       buildHtml();
       msg();
     })
-    .on("change", path => {
-      log( colors.cyan.bold("File changed: "), path );
+    .on('change', path => {
+      log( colors.cyan.bold('File changed: '), path );
       buildHtml();
       msg();
     });
 }
 function msg() {
   if (first) {
-    log( colors.blue.bold(colors.yellow(outFile), "was recreated.") );
+    log( colors.blue.bold(colors.yellow(outFile), 'was recreated.') );
   }
 }
 function setConfig(a) {
@@ -126,7 +126,7 @@ function setConfig(a) {
   if (a.outFile) {
     outFile = a.outFile;
   } else {
-    outFile  = "";
+    outFile  = '';
     outFile += a.outFilePath || defaults.outFilePath;
     outFile += a.outFileName || defaults.outFileName;
     outFile += a.outFileExt  || defaults.outFileExt;
@@ -135,21 +135,21 @@ function setConfig(a) {
     tempFiles = a.tempFiles;
   } else {
     let ext = a.tempFilesExt  || defaults.tempFilesExt;
-    tempFiles = "";
+    tempFiles = '';
     tempFiles += a.tempFilesName || defaults.tempFilesName;
-    tempFiles += ext.startsWith(".") ? ext : "."+ ext;
+    tempFiles += ext.startsWith('.') ? ext : '.'+ ext;
   }
   let i = a.indentChar;
-  i = i === "tab"    ? "\t"   :
-      i === "space4" ? "    " :
-      i === "space2" ? "  "   :
-      i === "space"  ? " "    :
+  i = i === 'tab'    ? '\t'   :
+      i === 'space4' ? '    ' :
+      i === 'space2' ? '  '   :
+      i === 'space'  ? ' '    :
       defaults.indentChar;
   let c = a.indentCount;
   c = isNum(c) ? c > 10 ? 10 : c : defaults.indentCount;
   indentChar    = i.repeat(c);
   dataFilesExt  = a.dataFilesExt || defaults.dataFilesExt;
-  dataFilesExt  = dataFilesExt.startsWith(".") ? dataFilesExt : "."+ dataFilesExt;
+  dataFilesExt  = dataFilesExt.startsWith('.') ? dataFilesExt : '.'+ dataFilesExt;
 
   return true;
 }
@@ -162,27 +162,27 @@ function exists(dir) {
         return true;
       } else {
         log(
-          colors.red.bold("rootDir:"),
-          colors.white.bold.bgRed(" "+ dir +" "),
-          colors.red.bold("must contain a:"),
-          colors.white.bold.bgRed(" "+ tempFiles +" "),
-          colors.red.bold("file.")
+          colors.red.bold('rootDir:'),
+          colors.white.bold.bgRed(' '+ dir +' '),
+          colors.red.bold('must contain a:'),
+          colors.white.bold.bgRed(' '+ tempFiles +' '),
+          colors.red.bold('file.')
         );
         return false;
       }
     } else {
       log(
-        colors.red.bold("rootDir:"),
-        colors.white.bold.bgRed(" "+ dir +" "),
-        colors.red.bold(" must be a dir, and not a file!")
+        colors.red.bold('rootDir:'),
+        colors.white.bold.bgRed(' '+ dir +' '),
+        colors.red.bold(' must be a dir, and not a file!')
       );
       return false;
     }
   } else {
     log(
-      colors.red.bold("rootDir:",
-      colors.white.bold.bgRed(" "+ dir +" "),
-      "does not exist!")
+      colors.red.bold('rootDir:',
+      colors.white.bold.bgRed(' '+ dir +' '),
+      'does not exist!')
     );
     return false;
     // /^.+.*[.]{1}[^.]*$/
@@ -191,9 +191,9 @@ function exists(dir) {
 function isOutFileValid(path) {
   if ( path.endsWith(DS) || path.endsWith(SEP) ) {
     log(
-      colors.red.bold("outFile:"),
-      colors.white.bold.bgRed(" "+ path +" "),
-      colors.red.bold("must be path of a file, and not a directory!")
+      colors.red.bold('outFile:'),
+      colors.white.bold.bgRed(' '+ path +' '),
+      colors.red.bold('must be path of a file, and not a directory!')
     );
     return false;
   }
@@ -210,13 +210,13 @@ function newEmpty() {
   };
 }
 function readFile(path) {
-  return fs.readFileSync(path, { encoding: "utf8", flag: "r" });
+  return fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
 }
 function getDirs(p) {
-  return fs.readdirSync(p).filter( f => fs.statSync(p+"/"+f).isDirectory() );
+  return fs.readdirSync(p).filter( f => fs.statSync(p+'/'+f).isDirectory() );
 }
 function getFiles(p) {
-  return fs.readdirSync(p).filter( f => fs.statSync(p+"/"+f).isFile() );
+  return fs.readdirSync(p).filter( f => fs.statSync(p+'/'+f).isFile() );
 }
 
 function getTarget(root, namespace, noTemp) {
@@ -236,7 +236,7 @@ function getTarget(root, namespace, noTemp) {
         let p = root.data[namespace];
         if ( isUndef(p) || isStr(p) ) {
           if (noTemp) {
-            if ( isUndef(p) ) { root.data[namespace] = ""; }
+            if ( isUndef(p) ) { root.data[namespace] = ''; }
             o = root.data;
           } else {
             root.data[namespace] = newEmpty();
@@ -252,7 +252,7 @@ function getTarget(root, namespace, noTemp) {
         if (!p) {
           src.data[root] = newEmpty();
         } else if (!p.data[namespace]) {
-          src.data[root].data[namespace] = noTemp ? "" : newEmpty();
+          src.data[root].data[namespace] = noTemp ? '' : newEmpty();
         }
         o = noTemp ? src.data[root].data : src.data[root].data[namespace];
       }
@@ -274,10 +274,10 @@ function addData(filePath, fileName, root, namespace, noTemp) {
     o.data[fileName] = readFile(filePath);
   } else {
     if (namespace) {
-      o[namespace] += "\n";
+      o[namespace] += '\n';
       o[namespace] += readFile(filePath) ;
     } else {
-      o += "\n";
+      o += '\n';
       o += readFile(filePath) ;
     }
 
@@ -293,7 +293,7 @@ function fudge(path, o, ns) {
       if ( i.endsWith(tempFiles) ) {
         addTemplate(fullPath, o, ns);
       } else if ( i.endsWith(dataFilesExt) ) {
-        let fileName = i.substr( 0, i.indexOf(".") );
+        let fileName = i.substr( 0, i.indexOf('.') );
         addData(fullPath, fileName, o, ns);
       }
     });
@@ -306,7 +306,7 @@ function fudge(path, o, ns) {
       if (files.length) {
         if (files.indexOf(tempFiles) !== -1) { // folder contains main.handlebars
           fudge(fullPath, ns ? o.data[ns] : o, i);
-        } else { // folder doesn"t contain .handlebars
+        } else { // folder doesn't contain .handlebars
           dirHandler(fullPath, o.data[ns] || o, i);
         }
       }
@@ -321,7 +321,7 @@ function dirHandler(p, root, ns) {
   if (files.length) {
     files.forEach(i => {
       if ( i.endsWith(dataFilesExt) ) {
-        addData(path+i, i.substr( 0, i.indexOf(".") ), root, ns, true);
+        addData(path+i, i.substr( 0, i.indexOf('.') ), root, ns, true);
       }
     });
   }
@@ -355,5 +355,5 @@ function buildHtml() {
   buildSrc();
   html = compile(src);
   html = indent.html(html, {tabString: indentChar});
-  fs.writeFileSync(outFile, html, "utf8");
+  fs.writeFileSync(outFile, html, 'utf8');
 }
