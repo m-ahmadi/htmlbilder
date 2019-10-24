@@ -16,13 +16,9 @@ const fs = require('fs');
 const Handlebars = require('handlebars');
 const indent = require('indent.js');
 const u = require('util-ma');
+const { isObj, isStr, isUndef, isNum } = require('util-ma');
 const SEP = path.sep;
 const DS = '/';
-
-const isObj = u.isObj;
-const isStr = u.isStr;
-const isUndef = u.isUndef;
-const isNum = u.isNum;
 
 let dir, outFile, tempFiles, dataFilesExt, indentChar,
   log,
