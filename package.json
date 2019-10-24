@@ -6,8 +6,9 @@
   "bin": "index.js",
   "scripts": {
     "start": "node index.js test/root",
+    "debug": "nodemon -x node --inspect-brk . -- -r test/root",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
+		},
   "author": "Mohammad Ahmadi",
   "repository": {
     "type": "git",
