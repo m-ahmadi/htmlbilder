@@ -1,15 +1,13 @@
 # `htmlbilder`
-
-
 **`htmlbilder`** is a tool for creating one HTML file, out of many Handlebars templates/layouts.  
 It is useful for spliting a large HTML file into many smaller files in order to have better maintainability.
 
 It mainly requires one thing, and that is a directory with a *`main.handlebars`* file in it.  
-It then renders that template and will put the output in an HTML file.  
+It then renders that template and writes the output to an HTML file.  
 
-It looks in the directory that the template was found in for any *`.htm`* file, if it finds any, it then passes them to the template as data, using name of the file as key and contents of the file as value.  
+It looks in the directory that the template was found in for any *`.htm`* file and if it finds any, it passes them to the template as data, using name of the file as key and contents of the file as value.  
 
-It looks in the folders in the directory that the template was found in too:  
+It also looks in the subfolders of the directory that the template was found in:  
 If folder does not contain a *`main.handlebars`* file, then it looks for any *`.htm`* files, and if it finds any, it concatenates them and passes them to the template as data, using the name of the folder as key and the concatenated result as value.  
 But if folder does contain a *`main.handlebars`* then it tries to render that template according to the same rules, and when it is done rendering it, it passes the output to the first template, using name of the folder as key and the render output as value.
 
