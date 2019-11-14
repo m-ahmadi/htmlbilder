@@ -15,7 +15,6 @@ const path = require('path');
 const fs = require('fs');
 const Handlebars = require('handlebars');
 const indent = require('indent.js');
-const u = require('util-ma');
 const { isObj, isStr, isUndef, isNum } = require('util-ma');
 const SEP = path.sep;
 const DS = '/';
