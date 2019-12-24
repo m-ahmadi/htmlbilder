@@ -248,7 +248,7 @@ templates/
     <meta charset="utf-8">
   </head>
   <body>
-   <div id="sidebar"></div>
+    <div id="sidebar"></div>
   
     <div class="modal">confirm</div>
     <div class="modal">alert</div>
