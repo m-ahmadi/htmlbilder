@@ -1,354 +1,147 @@
 #!/usr/bin/env node
-
-const defaults = {
-  rootDir:       './template',
-  outFilePath:   './',
-  outFileName:   'index-built',
-  outFileExt:    '.html',
-  tempFilesName: 'main',
-  tempFilesExt:  '.handlebars',
-  dataFilesExt:  '.htm',
-  indentChar:    '\t',
-  indentCount:   1
-};
-const path = require('path');
-const fs = require('fs');
+const { writeFileSync, readFileSync, readdirSync, statSync } = require('fs');
+const { join, extname, parse } = require('path');
+const chokidar = require('chokidar');
 const Handlebars = require('handlebars');
 const indent = require('indent.js');
-const { isObj, isStr, isUndef, isNum } = require('util-ma');
-const SEP = path.sep;
-const DS = '/';
+const log = console.log;
+colors();
 
-let dir, outFile, tempFiles, dataFilesExt, indentChar,
-  log,
-  chokidar, watcher, colors,
-  first;
-
-let src;
-let html = '';
+const defaults = {
+  rootDir:         './',
+  outFile:         './index.html',
+  tempFile:        'index.hbs',
+  dataFileExt:     '.htm',
+  indentChar:      'tab',
+  indentCharCount: 1
+};
+const charmap = new Map([['tab', '\t'], ['space', ' ']]);
 
 if (require.main === module) { // called from command line
-  log = console.log;
-  colors = require('colors/safe');
-
-  const y = require('yargs');
-  y.usage('Usage: \n $0 templates/ -o index.html [-t main.hbs -e .html -w]');
-  y.version();
-  y.options( require('./yOpts') );
-  y.alias('h', 'help');
-  y.help('h');
-  let args = y.argv;
-
-  if ( !process.argv.slice(2).length && !args._.length &&
-    !args.r && !args.o && !args.t && !args.e && !args.i && !args.c && !args.w && !args.v &&
-    !args.P && !args.N && !args.X && !args.T && !args.E
-  ) {
-    log(
-      colors.yellow.bold('No argument was specified,'),
-      colors.yellow.bold('switching to default values...\n')
-    );
-  }
-
-  if (args._.length) {
-    args.hyphenless = args._[0];
-  }
-  setConfig(args);
-  let dirExists = exists(dir);
-  if (!dirExists) { return; }
-  if ( !isOutFileValid(outFile) ) { return; }
-
-  if (args.w) {
-    first = false;
-    chokidar = require('chokidar');
-    watcher = chokidar.watch(`${dir}/**/*`, {ignored: /[\/\\]\./, persistent: true});
-    addWatch();
+  const cmd = require('commander');
+  const pkg = JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8'));
+  cmd
+    .helpOption('-h, --help', 'Show help.')
+    .name('htmlbilder')
+    .usage('somedir [-o page.html -t main.hbs -e .html -w]')
+    .description(pkg.description)
+    .option('-r, --rootDir [value]',         'Templates directory path. Ignored if hyphenless arg is provided.',        defaults.rootDir)
+    .option('-o, --outFile [value]',         'The output file.',                                                        defaults.outFile)
+    .option('-t, --tempFile [value]',        'Filename pattern for the template files.',                                defaults.tempFile)
+    .option('-e, --dataFileExt [value]',     'The file extension that should be considered as a data file.',            defaults.dataFileExt)
+    .option('-i, --indentChar [value]',      'Indent character for indenting the output HTML file. options: tab|space', defaults.indentChar)
+    .option('-c, --indentCharCount [value]', 'How many indentChar? maximum value: 8',                                   defaults.indentCharCount)
+    .option('-w, --watch',                   'Watch for changes and recreate the output file on changes.')
+    .version(pkg.version, '-v, --version',   'Show version number.');
+  cmd.parse(process.argv);
+  
+  const hypenless = cmd.args[0];
+  if (hypenless) cmd.rootDir = hypenless;
+  if (cmd.watch) {
+    watch( cmd.opts() );
   } else {
-    buildHtml();
-    log( colors.blue.bold('File:', colors.yellow(outFile), 'is created.') );
+    build( cmd.opts() );
   }
-
 } else { // required as a module
-  module.exports = {
-    setConfig: setConfig,
-    buildHtml: buildHtml
-  };
+  module.exports = build;
 }
 
-
-function addWatch() {
-  watcher
-    .on('ready', function () {
-      first = true;
-      buildHtml();
-      log( colors.blue.bold('Initial', colors.yellow(outFile), 'is created.') );
-      log( colors.blue.bold('Watching', colors.yellow(dir), 'for changes...') );
-    })
-    .on('add', path => {
-      log( colors.green.bold('File added:'), path );
-      buildHtml();
-      msg();
-    })
-    .on('addDir', path => {
-      log( colors.black.bgGreen('Folder added: '), path );
-      buildHtml();
-      msg();
-    })
-    .on('unlink', path => {
-      log( colors.red.bold('File removed: '), path );
-      buildHtml();
-      msg();
-    })
-    .on('unlinkDir', path => {
-      log( colors.white.bgRed('Folder removed:'), path );
-      buildHtml();
-      msg();
-    })
-    .on('change', path => {
-      log( colors.cyan.bold('File changed: '), path );
-      buildHtml();
-      msg();
-    });
+function build(userSettings) {
+  const settings = Object.assign(defaults, userSettings);
+  const { rootDir, outFile, tempFile, dataFileExt, indentChar, indentCharCount } = settings;
+  const tree = dirTree(rootDir, dataFileExt);
+  const html = parseAndRender(tree, {tempFile, dataFileExt});
+  const indentedHtml = indent.html(html, {tabString: charmap.get(indentChar).repeat(indentCharCount > 8 ? 8 : +indentCharCount)});
+  writeFileSync(outFile, indentedHtml, 'utf8');
+  log('Built:'.greenB, outFile.yellowB);
 }
-function msg() {
-  if (first) {
-    log( colors.blue.bold(colors.yellow(outFile), 'was recreated.') );
-  }
-}
-function setConfig(a) {
-  if ( !isObj(a) ) { return false; }
 
-  dir = a.hyphenless ? a.hyphenless : a.rootDir || defaults.rootDir;
-  if (a.outFile) {
-    outFile = a.outFile;
-  } else {
-    outFile  = '';
-    outFile += a.outFilePath || defaults.outFilePath;
-    outFile += a.outFileName || defaults.outFileName;
-    outFile += a.outFileExt  || defaults.outFileExt;
-  }
-  if (a.tempFiles) {
-    tempFiles = a.tempFiles;
-  } else {
-    let ext = a.tempFilesExt  || defaults.tempFilesExt;
-    tempFiles = '';
-    tempFiles += a.tempFilesName || defaults.tempFilesName;
-    tempFiles += ext.startsWith('.') ? ext : '.'+ ext;
-  }
-  let i = a.indentChar;
-  i = i === 'tab'    ? '\t'   :
-      i === 'space4' ? '    ' :
-      i === 'space2' ? '  '   :
-      i === 'space'  ? ' '    :
-      defaults.indentChar;
-  let c = a.indentCount;
-  c = isNum(c) ? c > 10 ? 10 : c : defaults.indentCount;
-  indentChar    = i.repeat(c);
-  dataFilesExt  = a.dataFilesExt || defaults.dataFilesExt;
-  dataFilesExt  = dataFilesExt.startsWith('.') ? dataFilesExt : '.'+ dataFilesExt;
-
-  return true;
-}
-function exists(dir) {
-  let existsSync = fs.existsSync;
-  if ( existsSync(dir) ) {
-    if ( isDir(dir) ) {
-      let mainTemp = dir.endsWith(DS) ? dir + tempFiles : `${dir}${DS}${tempFiles}`;
-      if ( existsSync(mainTemp) ) {
-        return true;
-      } else {
-        log(
-          colors.red.bold('rootDir:'),
-          colors.white.bold.bgRed(' '+ dir +' '),
-          colors.red.bold('must contain a:'),
-          colors.white.bold.bgRed(' '+ tempFiles +' '),
-          colors.red.bold('file.')
-        );
-        return false;
-      }
+function dirTree(dir, dataFileExt, tree={}) {
+  readdirSync(dir).forEach(file => {
+    const path = join(dir, file);
+    if ( statSync(path).isDirectory() ) {
+      tree[file] = {};
+      dirTree(path, dataFileExt, tree[file]);
     } else {
-      log(
-        colors.red.bold('rootDir:'),
-        colors.white.bold.bgRed(' '+ dir +' '),
-        colors.red.bold(' must be a dir, and not a file!')
-      );
-      return false;
-    }
-  } else {
-    log(
-      colors.red.bold('rootDir:',
-      colors.white.bold.bgRed(' '+ dir +' '),
-      'does not exist!')
-    );
-    return false;
-    // /^.+.*[.]{1}[^.]*$/
-  }
-}
-function isOutFileValid(path) {
-  if ( path.endsWith(DS) || path.endsWith(SEP) ) {
-    log(
-      colors.red.bold('outFile:'),
-      colors.white.bold.bgRed(' '+ path +' '),
-      colors.red.bold('must be path of a file, and not a directory!')
-    );
-    return false;
-  }
-  return true;
-}
-function isDir(p) {
-  return fs.lstatSync(p).isDirectory();
-}
-
-function newEmpty() {
-  return {
-    template: undefined,
-    data: {}
-  };
-}
-function readFile(path) {
-  return fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
-}
-function getDirs(p) {
-  return fs.readdirSync(p).filter( f => fs.statSync(p+'/'+f).isDirectory() );
-}
-function getFiles(p) {
-  return fs.readdirSync(p).filter( f => fs.statSync(p+'/'+f).isFile() );
-}
-
-function getTarget(root, namespace, noTemp) {
-  let o;
-  if (root) {
-    if (!namespace) {
-      if ( isObj(root) ) {
-        o = root;
-      } else if ( isStr(root) ) {
-        if (!src.data[root]) {
-          src.data[root] = newEmpty();
-        }
-        o = src.data[root];
-      }
-    } else if (namespace) {
-      if ( isObj(root) ) {
-        let p = root.data[namespace];
-        if ( isUndef(p) || isStr(p) ) {
-          if (noTemp) {
-            if ( isUndef(p) ) { root.data[namespace] = ''; }
-            o = root.data;
-          } else {
-            root.data[namespace] = newEmpty();
-            o = root.data[namespace];
-          }
-        } else {
-          if ( isObj(p) ) {
-            o = root.data[namespace];
-          }
-        }
-      } else if ( isStr(root) ) {
-        let p = src.data[root];
-        if (!p) {
-          src.data[root] = newEmpty();
-        } else if (!p.data[namespace]) {
-          src.data[root].data[namespace] = noTemp ? '' : newEmpty();
-        }
-        o = noTemp ? src.data[root].data : src.data[root].data[namespace];
-      }
-    }
-  } else {
-    o = src;
-  }
-
-  return o;
-}
-function addTemplate(path, root, namespace) {
-  let o = getTarget(root, namespace);
-  o.template = Handlebars.compile( readFile(path) );
-}
-function addData(filePath, fileName, root, namespace, noTemp) {
-  let o = getTarget(root, namespace, noTemp);
-
-  if (!noTemp) {
-    o.data[fileName] = readFile(filePath);
-  } else {
-    if (namespace) {
-      o[namespace] += '\n';
-      o[namespace] += readFile(filePath) ;
-    } else {
-      o += '\n';
-      o += readFile(filePath) ;
-    }
-
-  }
-}
-function fudge(path, o, ns) {
-  let root = path.endsWith(DS) ? path: path+DS;
-
-  let files = getFiles(path);
-  if (files.length) {
-    files.forEach(i => {
-      let fullPath = root+i;
-      if ( i.endsWith(tempFiles) ) {
-        addTemplate(fullPath, o, ns);
-      } else if ( i.endsWith(dataFilesExt) ) {
-        let fileName = i.substr( 0, i.indexOf('.') );
-        addData(fullPath, fileName, o, ns);
-      }
-    });
-  }
-  let dirs = getDirs(path);
-  if (dirs.length) { // folder contains folder(s)
-    dirs.forEach(i => {
-      let fullPath = root+i;
-      let files = getFiles(fullPath);
-      if (files.length) {
-        if (files.indexOf(tempFiles) !== -1) { // folder contains main.handlebars
-          fudge(fullPath, ns ? o.data[ns] : o, i);
-        } else { // folder doesn't contain .handlebars
-          dirHandler(fullPath, o.data[ns] || o, i);
-        }
-      }
-    });
-  }
-}
-function dirHandler(p, root, ns) {
-  let path = p.endsWith(DS) ? p : p+DS;
-  let files = getFiles(path);
-  let dirs = getDirs(path);
-
-  if (files.length) {
-    files.forEach(i => {
-      if ( i.endsWith(dataFilesExt) ) {
-        addData(path+i, i.substr( 0, i.indexOf('.') ), root, ns, true);
-      }
-    });
-  }
-  if (dirs.length) {
-    dirs.forEach(i => {
-      dirHandler(path+i, root, ns);
-    });
-  }
-}
-
-function buildSrc() {
-  fudge(dir, src);
-  // console.log(src);
-}
-function compile(o, parent, key) {
-  let data = o.data;
-  Object.keys(data).forEach(i => {
-    let p = data[i];
-    if ( isObj(p) ) {
-      compile(p, o, i);
+      const content = readFileSync(path, 'utf8') ;
+      tree[file] = extname(file) === dataFileExt ? content : Handlebars.compile(content);
     }
   });
-  if (parent && key) {
-    parent.data[key] = o.template(data);
-  } else {
-    return o.template(data);
+  return tree;
+}
+
+function parseAndRender(node, settings) {
+  const dirs = getDirs(node);
+  if (dirs.length) {
+    dirs.forEach(k => {
+      if (getDirs(node[k]).length) {
+        node[k] = parseAndRender(node[k], settings);
+      } else {
+        node[k] = render(node[k], settings);
+      }
+    });
   }
+  return render(node, settings);
 }
-function buildHtml() {
-  src = newEmpty();
-  buildSrc();
-  html = compile(src);
-  html = indent.html(html, {tabString: indentChar});
-  fs.writeFileSync(outFile, html, 'utf8');
+
+function getDirs(node) {
+  return Object.keys(node).filter(k => Object.prototype.toString.call(node[k]) === '[object Object]');
 }
+
+function render(node, settings) {
+  const files     = Object.keys(node).filter( k => ['function','string'].includes(typeof node[k]) );
+  const tempFile  = files.find(k => k === settings.tempFile);
+  const dataFiles = files.filter(k => !extname(k) || extname(k) === settings.dataFileExt);
+  let result = '';
+  if (tempFile) {
+    const context = dataFiles.reduce((a,c) => (a[c.replace(extname(c), '')] = node[c]) && a, {});
+    result = node[tempFile](context);
+  } else {
+    result = dataFiles.reduce((a,c) => a += node[c]+'\n', '');
+  }
+  return result;
+}
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// util
+function watch(settings) {
+  const { rootDir, outFile } = settings;
+  const watcher = chokidar.watch(rootDir, {ignored: /[\/\\]\./, persistent: true}).on('ready', () => {
+    build(settings);
+    log('Watching'.magenta, rootDir.whiteB, 'for changes...'.magenta);
+    
+    watcher
+      .on('add', path => {
+        log( 'File added:'.magenta, path);
+        build(settings);
+      })
+      .on('addDir', path => {
+        log('Folder added:'.magenta, path);
+        build(settings);
+      })
+      .on('unlink', path => {
+        log('File removed:'.magenta, path);
+        build(settings);
+      })
+      .on('unlinkDir', path => {
+        log('Folder removed:'.magenta, path);
+        build(settings);
+      })
+      .on('change', path => {
+        log('File changed:'.magenta, path);
+        build(settings);
+      });
+  });
+}
+function colors() {
+  [
+    ['magenta',    35],
+    ['greenB',     92],
+    ['yellowB',    93],
+    ['whiteB',     97],
+  ].forEach(([k, n]) => {
+    String.prototype.__defineGetter__(k, function () {
+      return `[${n}m${this}[0m`;
+    });
+  });
+}
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
