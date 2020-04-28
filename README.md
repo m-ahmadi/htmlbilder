@@ -1,17 +1,20 @@
 This is a tool for converting a directory of `Handlebars` templates into one `.html` file.
 
 It recursively does the following:  
-If it finds an `index.hbs` file in a directory, it renders the template and passes all the `.htm` files in that directly (direct children) to the template as a context object, using name of the file as key and contents of it as value.otherwise it just concatenates the files.
+If it finds an `index.hbs` file in a directory, it renders the template and passes all the `.htm` files in that directory (direct children) to the template as a context object, using name of the file as key and contents of the file as value.  
+If no `index.hbs` file is found in a directory, it just concatenates the `.htm` files in that directory.
 
-## Usage example:
+You can configure it to use different name patterns or extension for files.
+
+## Usage:
 If we have the following directory:
 ```
-templates/
-├─ main.handlebars
+somedir/
+├─ index.hbs
 ├─ header.htm
 └─ footer.htm
 ```
-and our *`main.handlebars`* contained:
+and our `index.hbs` contained:
 ```html
 <!DOCTYPE html>
 <html>
@@ -20,42 +23,40 @@ and our *`main.handlebars`* contained:
   </head>
   <body>
     {{{ header }}}
-    
+
     {{{ footer }}}
   </body>
 </html>
 ```
 
-and contents of the *`header.htm`* file was:
+and contents of the `header.htm` file were:
 ```html
 <header>
   <h1>Header</h1>
 </header>
 ```
 
-and the *`footer.htm`* file looked like this:
+and the `footer.htm` file looked like this:
 ```html
 <footer>
   <h3>Footer</h3>
 </footer>
 ```
-then after running:  
-`htmlbilder somedir`  
-our *`index.html`* would look like this:
+then after running: `htmlbilder somedir` our `index.html` would look like this:
 ```html
 <!DOCTYPE html>
 <html>
   <head>
-<meta charset="utf-8">
+    <meta charset="utf-8">
   </head>
   <body>
     <header>
-		<h1>Header</h1>
+      <h1>Header</h1>
     </header>
-    
+
     <footer>
-		<h1>Footer</h1>
-	</footer>
+      <h1>Footer</h1>
+    </footer>
   </body>
 </html>
 ```
@@ -85,11 +86,11 @@ Options:
 ## More examples:
 ### A directory containing a template:
 ```html
-templates/
-├─ main.handlebars
+somedir/
+├─ index.hbs
 ├─ sidebar.htm
 └─ header/
-   ├─ main.handlebars
+   ├─ index.hbs
    ├─ user.htm
    └─ nav.htm
 ```
@@ -97,18 +98,18 @@ templates/
 <!-- somedir/index.hbs -->
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <meta charset="utf-8">
   </head>
   <body>
-	{{{ header }}}
-	
+    {{{ header }}}
+
     {{{ sidebar }}}
   </body>
 </html>
 
 <!-- somedir/sidebar.htm -->     <div id="sidebar"></div>
-<!-- somedir/header/index.hbs-->
+<!-- somedir/header/index.hbs -->
 <header>
   {{{ nav }}}
   {{{ user }}}
@@ -121,17 +122,17 @@ templates/
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <meta charset="utf-8">
   </head>
   <body>
     <header>
-		<nav id="navigation"></nav>
-		<div id="user-info"></div>
+      <nav id="navigation"></nav>
+      <div id="user-info"></div>
     </header>
-    
+
     <div id="sidebar"></div>
-</body>
+  </body>
 </html>
 ```
 ### A directory not containing a template:
@@ -144,19 +145,19 @@ somedir/
    ├─ confirm.htm
    ├─ alert.htm
 └─ prompts/
-      ├─ age.htm
-      └─ job.htm
+   ├─ age.htm
+   └─ job.htm
 ```
 ```html
 <!-- somedir/index.hbs: --> 
 <!DOCTYPE html>
-<html>
+  <html>
   <head>
     <meta charset="utf-8">
   </head>
   <body>
-	{{{ sidebar }}}
-	
+    {{{ sidebar }}}
+
     {{{ modals }}}
   </body>
 </html>
@@ -172,13 +173,13 @@ somedir/
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <meta charset="utf-8">
   </head>
   <body>
     <div id="sidebar"></div>
-    
-	<div class="modal">confirm</div>
+
+    <div class="modal">confirm</div>
     <div class="modal">alert</div>
     <div class="modal">prompt age</div>
     <div class="modal">prompt job</div>
