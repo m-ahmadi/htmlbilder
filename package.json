@@ -1,7 +1,7 @@
 {
   "name": "htmlbilder",
   "description": "A tool for converting a directory of Handlebars templates into one HTML file.",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "main": "index.js",
   "bin": "index.js",
   "scripts": {
