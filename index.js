@@ -52,7 +52,7 @@ function build(userSettings) {
   const tree = dirTree(rootDir, dataFileExt);
   const html = parseAndRender(tree, {tempFile, dataFileExt});
   const indentedHtml = indent.html(html, {tabString: charmap.get(indentChar).repeat(indentCharCount > 8 ? 8 : +indentCharCount)});
-  writeFileSync(outFile, indentedHtml, 'utf8');
+  writeFileSync(outFile, indentedHtml);
   log('Built:'.greenB, outFile.yellowB);
 }
 
@@ -63,7 +63,7 @@ function dirTree(dir, dataFileExt, tree={}) {
       tree[file] = {};
       dirTree(path, dataFileExt, tree[file]);
     } else {
-      const content = readFileSync(path, 'utf8') ;
+      const content = readFileSync(path, 'utf8');
       tree[file] = extname(file) === dataFileExt ? content : Handlebars.compile(content);
     }
   });
